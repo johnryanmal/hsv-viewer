@@ -1,4 +1,5 @@
 const path = require('path')
+const { CleanWebpackPlugin } = require("clean-webpack-plugin")
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
@@ -21,6 +22,9 @@ module.exports = (env) => {
       port: 5000,
       open: true,
     },
+    stats: {
+      loggingDebug: ['sass-loader'],
+    },
     module: {
       rules: [
         {
@@ -38,6 +42,7 @@ module.exports = (env) => {
       ]
     },
     plugins: [
+      new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         template: './src/index.html'
       }),

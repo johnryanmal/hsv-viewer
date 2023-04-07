@@ -1,4 +1,4 @@
-import './style.scss'
+import './scss/style.scss'
 import axios from 'axios'
 
 axios.get('https://api.color.pizza/v1/?list=bestOf')

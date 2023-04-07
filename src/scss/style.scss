@@ -1,0 +1,45 @@
+//colors
+:root {
+  --raisin-black: #2E282A;
+  --almond: #F2E2D2;
+  --bittersweet: #FE5F55;
+  --viridian: #56876D;
+  --savoy-blue: #6369D1;
+  --tropical-indigo: #9D8DF1;
+}
+
+//fonts
+@import url('https://fonts.googleapis.com/css2?family=Hind&family=Montserrat:wght@700&display=swap');
+
+//mixin
+@import 'mixins.scss';
+
+//style
+body {
+  background-color: var(--raisin-black);
+  color: var(--almond);
+  font-family: 'Hind', sans-serif;
+}
+
+@include headings {
+  font-family: 'Montserrat', sans-serif;
+}
+
+a {
+  color: var(--savoy-blue);
+  text-decoration: none;
+
+  @include enabled {
+    //order is important (visited -> hover -> active)
+    &:visited {
+      color: var(--tropical-indigo);
+    }
+    &:hover {
+      color: var(--tropical-indigo);
+      text-decoration: underline;
+    }
+    &:active {
+      color: var(--bittersweet);
+    }
+  }
+}
