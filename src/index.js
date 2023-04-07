@@ -1,4 +1,6 @@
-import './scss/style.scss'
+import './scss/styles.scss'
+import * as bootstrap from 'bootstrap'
+
 import axios from 'axios'
 
 axios.get('https://api.color.pizza/v1/?list=bestOf')

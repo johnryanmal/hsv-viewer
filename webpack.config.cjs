@@ -1,11 +1,20 @@
 const path = require('path')
-const { CleanWebpackPlugin } = require("clean-webpack-plugin")
+const autoprefixer = require('autoprefixer')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = (env) => {
   const style_loader = env.production ? MiniCssExtractPlugin.loader : 'style-loader'
-  
+  const postcss_loader = {
+    loader: 'postcss-loader',
+    options: {
+      postcssOptions: {
+        plugins: () => [autoprefixer]
+      }
+    }
+  }
+
   const dist = path.resolve(__dirname, 'dist')
 
   return {
@@ -19,7 +28,7 @@ module.exports = (env) => {
       static: {
         directory: dist
       },
-      port: 5000,
+      port: 8080,
       open: true,
     },
     stats: {
@@ -33,11 +42,11 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/i,
-          use: [style_loader, 'css-loader']
+          use: [style_loader, 'css-loader', postcss_loader]
         },
         {
           test: /\.s[ac]ss$/i,
-          use: [style_loader, 'css-loader', 'sass-loader']
+          use: [style_loader, 'css-loader', postcss_loader, 'sass-loader']
         }
       ]
     },
@@ -47,7 +56,7 @@ module.exports = (env) => {
         template: './src/index.html'
       }),
       new MiniCssExtractPlugin({
-          filename: 'main.css'
+        filename: 'main.css'
       })
     ]
   }
