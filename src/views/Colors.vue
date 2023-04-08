@@ -1,6 +1,4 @@
-import './scss/styles.scss'
-import * as bootstrap from 'bootstrap'
-
+<script>
 import axios from 'axios'
 
 axios.get('https://api.color.pizza/v1/?list=bestOf')
@@ -14,3 +12,11 @@ axios.get('https://api.color.pizza/v1/?list=bestOf')
 }).catch((err) => {
   console.error(err)
 })
+</script>
+
+<template>
+	<div class="colors">
+	  <h1>Colors</h1>
+    <p>View colors from a handpicked list. Powered by <a href="https://github.com/meodai/color-name-api">color-name-api</a>.</p>
+	</div>
+</template>
