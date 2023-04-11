@@ -15,8 +15,8 @@ axios.get('https://api.color.pizza/v1/?list=bestOf')
 </script>
 
 <template>
-	<div class="colors">
-	  <h1>Colors</h1>
+  <div class="colors">
+    <h1>Colors</h1>
     <p>View colors from a handpicked list. Powered by <a href="https://github.com/meodai/color-name-api">color-name-api</a>.</p>
-	</div>
+  </div>
 </template>
