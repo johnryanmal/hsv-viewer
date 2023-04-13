@@ -1,5 +1,5 @@
 //bootstrap
-@import "~bootstrap/scss/bootstrap";
+@import "bootstrap.scss";
 
 //colors
 :root {
@@ -18,31 +18,50 @@
 @import 'mixins.scss';
 
 //style
-body {
-  background-color: var(--raisin-black);
-  color: var(--almond);
+// body {
+//   // background-color: var(--raisin-black);
+//   // color: var(--almond);
+//   font-family: 'Montserrat', sans-serif;
+// }
+
+// @include headings {
+//   font-family: 'Montserrat', sans-serif;
+// }
+
+p {
   font-family: 'Hind', sans-serif;
 }
 
-@include headings {
-  font-family: 'Montserrat', sans-serif;
-}
-
-a {
-  color: var(--savoy-blue);
-  text-decoration: none;
-
-  @include enabled {
-    //order is important (visited -> hover -> active)
-    &:visited {
-      color: var(--tropical-indigo);
-    }
-    &:hover {
-      color: var(--tropical-indigo);
-      text-decoration: underline;
-    }
-    &:active {
-      color: var(--bittersweet);
-    }
+a:not([class]) {
+  &:visited {
+    color: $link-visited-color;
+    text-decoration: $link-visited-decoration;
+  }
+  // &:hover {
+  //   color: $link-hover-color;
+  //   text-decoration: $link-hover-decoration;
+  // }
+  &:active {
+    color: $link-active-color;
+    text-decoration: $link-active-decoration;
   }
 }
+
+// a:not([class]) {
+//   color: var(--savoy-blue);
+//   text-decoration: none;
+
+//   @include enabled {
+//     //order is important (visited -> hover -> active)
+//     &:visited {
+//       color: var(--tropical-indigo);
+//     }
+//     &:hover {
+//       color: var(--tropical-indigo);
+//       text-decoration: underline;
+//     }
+//     &:active {
+//       color: var(--bittersweet);
+//     }
+//   }
+// }

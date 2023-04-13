@@ -1,0 +1,56 @@
+@function color-map($name, $color) {
+  @return (
+    "#{$name}-100": tint-color($color, 80%),
+    "#{$name}-200": tint-color($color, 60%),
+    "#{$name}-300": tint-color($color, 40%),
+    "#{$name}-400": tint-color($color, 20%),
+    "#{$name}-500": $color,
+    "#{$name}-600": shade-color($color, 20%),
+    "#{$name}-700": shade-color($color, 40%),
+    "#{$name}-800": shade-color($color, 60%),
+    "#{$name}-900": shade-color($color, 80%)
+  );
+}
+
+$light: #F2E2D2;
+$dark: #2E282A;
+$primary: #FE5F55;
+
+// $theme-colors: (
+//   "primary":    $primary,
+//   "secondary":  $secondary,
+//   "success":    $success,
+//   "info":       $info,
+//   "warning":    $warning,
+//   "danger":     $danger,
+//   "light":      $light,
+//   "dark":       $dark
+// );
+
+// $theme-colors: (
+// 	"raisin-black": #2E282A,
+//   "almond": #F2E2D2,
+//   "bittersweet": #FE5F55,
+//   "viridian": #56876D,
+//   "savoy-blue": #6369D1,
+//   "tropical-indigo": #9D8DF1
+// );
+
+$link-color: #6369D1;
+$link-decoration: none;
+
+$link-hover-color: #9D8DF1;
+$link-hover-decoration: underline;
+
+$link-active-color: $primary;
+$link-active-decoration: $link-hover-decoration;
+
+$link-visited-color: $link-hover-color;
+$link-visited-decoration: none;
+
+
+$font-family-sans-serif: 'Montserrat', sans-serif;
+
+$body-bg: $dark;
+$body-color: $light;
+
