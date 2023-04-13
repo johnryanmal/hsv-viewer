@@ -1,22 +1,18 @@
-<script>
-import axios from 'axios'
-
-axios.get('https://api.color.pizza/v1/?list=bestOf')
-.then((res) => {
-  let colors = res.data.colors
-  let colorMap = {}
-  for (const {name, ...data} of colors) {
-    colorMap[name] = {...data}
-  }
-  console.log(colorMap)
-}).catch((err) => {
-  console.error(err)
-})
+<script setup>
+import ColorList from '@/components/ColorList.vue'
 </script>
 
 <template>
-  <div class="colors">
+  <div>
     <h1>Colors</h1>
     <p>View colors from a handpicked list. Powered by <a href="https://github.com/meodai/color-name-api">color-name-api</a>.</p>
   </div>
+  <Suspense>
+    <template #default>
+      <ColorList />
+    </template>
+    <template #fallback>
+      <p>Loading...</p>
+    </template>
+  </Suspense>
 </template>
