@@ -7,8 +7,8 @@ const colors = computed(() => store.getList('bestOf'))
 </script>
 
 <template>
-	<template v-for="[name, data], index in colors" :key="name">
-		<p>
+	<template v-for="[name, data] in colors" :key="name">
+		<p :style="{ backgroundColor: data.hex, color: data.luminanceWCAG > 0.5 ? 'black' : 'white' }">
 			{{ name }}
 		</p>
 	</template>
