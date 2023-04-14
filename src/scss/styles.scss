@@ -28,6 +28,12 @@
 //   font-family: 'Montserrat', sans-serif;
 // }
 
+.animate-size {
+  transition-property: width, height, margin, padding, max-width, max-height;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+}
+
 p {
   font-family: 'Hind', sans-serif;
 }
