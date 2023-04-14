@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
@@ -27,8 +27,8 @@ export default defineStore('counter', () => {
       const colors = response.data.colors.sort()
 
       let result = new Map() // use map to maintain insertion order (sorted)
-      for (const {name, ...data} of colors) {
-        result.set(name, data)
+      for (const color of colors) {
+        result.set(color.name, color)
       }
       return result
     }
