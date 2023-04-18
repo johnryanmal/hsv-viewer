@@ -3,6 +3,8 @@
 
 //colors
 :root {
+  --bs-table-color: $light;
+  --bs-table-striped-color: $light;
   --raisin-black: #2E282A;
   --almond: #F2E2D2;
   --bittersweet: #FE5F55;
@@ -39,6 +41,7 @@ p {
 }
 
 a:not([class]) {
+  font-family: 'Hind', sans-serif;
   &:visited {
     color: $link-visited-color;
     text-decoration: $link-visited-decoration;
