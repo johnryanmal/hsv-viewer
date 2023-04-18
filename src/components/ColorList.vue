@@ -49,10 +49,23 @@ function toHSL(color) {
 
 <template>
   <div class="table-responsive">
-    <table class="table table-dark table-borderless align-middle table-striped">
+    <table class="table table-borderless table-dark align-middle table-striped">
       <thead>
+        <tr class="border-bottom">
+          <template :key="name" v-for="span, name in {
+            'General': 3,
+            'Values': 6,
+            'CSS': 2
+          }">
+            <th scope="colgroup" :colspan="span">{{ name }}</th>
+          </template>
+        </tr>
         <tr>
-          <template v-for="name in ['Color', 'Name', 'Hex', 'RGB', 'HSL']" :key="name">
+          <template :key="name" v-for="name in [
+            'Color', 'Name', 'Hex',
+            'Red', 'Green', 'Blue', 'Hue', 'Satuation', 'Lightness',
+            'RGB', 'HSL'
+          ]">
             <th scope="col">
               {{ name }}
             </th>
@@ -60,7 +73,7 @@ function toHSL(color) {
         </tr>
       </thead>
       <tbody>
-        <template v-for="[name, color] in colors" :key="name">
+        <template :key="name" v-for="[name, color] in colors">
           <tr>
             <th scope="row">
               <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5em', 'height': '2.5em', 'backgroundColor': color.hex }">
@@ -72,8 +85,12 @@ function toHSL(color) {
                 {{ name }}
               </p>
             </td>
-            <template v-for="data in [color.hex, toRGB(color), toHSL(color)]">
-              <td>
+            <template :key="index" v-for="data, index in [
+              color.hex,
+              color.rgb.r, color.rgb.g, color.rgb.b, color.hsl.h, color.hsl.s, color.hsl.l,
+              toRGB(color), toHSL(color)
+            ]">
+              <td :class="{ 'text-center': typeof data === 'number'}">
                 <a href="#" @click.prevent="copy(data)">{{ data }}</a>
               </td>
             </template>
