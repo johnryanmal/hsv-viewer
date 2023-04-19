@@ -57,7 +57,7 @@ function toHSL(color) {
             'Values': 6,
             'CSS': 2
           }">
-            <th scope="colgroup" :colspan="span">{{ name }}</th>
+            <th scope="colgroup" :colspan="span"><h5>{{ name }}</h5></th>
           </template>
         </tr>
         <tr>
@@ -76,7 +76,7 @@ function toHSL(color) {
         <template :key="name" v-for="[name, color] in colors">
           <tr>
             <th scope="row">
-              <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5em', 'height': '2.5em', 'backgroundColor': color.hex }">
+              <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
                 <p class="m-0" :style="{ 'color': textColor(color).hex } ">Aa</p>
               </div>
             </th>
