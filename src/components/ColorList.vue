@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue'
-import useColorStore from '@/stores/color.js'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useColorStore } from '@/stores/color.js'
+import VirtualScroller from '@/components/VirtualScroller.vue'
 
 const store = useColorStore()
 const colors = computed(() => store.getList('bestOf'))
@@ -45,11 +46,40 @@ function toHSL(color) {
   const { h, s, l } = color.hsl
   return `hsl(${listed(h, s, l)})`
 }
+
+const rem = ref(parseInt(window.getComputedStyle(document.body).fontSize))
+const vw = ref(window.innerWidth / 100)
+const rowHeight = computed(() => 3.5*rem.value + 1*vw.value)
+
+const innerHeight = ref(window.innerHeight)
+
+const scroller = ref(null)
+const top = ref(null)
+
+function onResize() {
+  innerHeight.value = window.innerHeight
+}
+
+function onScroll() {
+  rem.value = parseInt(window.getComputedStyle(document.body).fontSize)
+  vw.value = window.innerWidth / 100
+  top.value = scroller.value.getBoundingClientRect().top
+}
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+  window.addEventListener('scroll', onScroll)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize)
+  window.removeEventListener('scroll', onScroll)
+})
 </script>
 
 <template>
   <div class="table-responsive">
-    <table class="table table-borderless table-dark align-middle table-striped">
+    <table class="table table-borderless table-dark align-middle table-striped overflow-hidden">
       <thead>
         <tr class="border-bottom">
           <template :key="name" v-for="span, name in {
@@ -72,30 +102,40 @@ function toHSL(color) {
           </template>
         </tr>
       </thead>
-      <tbody>
-        <template :key="name" v-for="[name, color] in colors">
-          <tr>
-            <th scope="row">
-              <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
-                <p class="m-0" :style="{ 'color': textColor(color).hex } ">Aa</p>
-              </div>
-            </th>
-            <td>
-              <p class="m-0">
-                {{ name }}
-              </p>
-            </td>
-            <template :key="index" v-for="data, index in [
-              color.hex,
-              color.rgb.r, color.rgb.g, color.rgb.b, color.hsl.h, color.hsl.s, color.hsl.l,
-              toRGB(color), toHSL(color)
-            ]">
-              <td :class="{ 'text-center': typeof data === 'number'}">
-                <a href="#" @click.prevent="copy(data)">{{ data }}</a>
+      <tbody ref="scroller" :style="{ 'height': Math.round(rowHeight * colors.size)+'px'}">
+        <VirtualScroller
+          v-if="colors.entries"
+          :item-list="Array.from(colors.entries())"
+          :item-height="rowHeight"
+          :item-cluster="2"
+          :view-height="innerHeight"
+          :view-scroll="-top"
+          :view-buffer="0"
+        >
+          <template #default="{item: [name, color], top} " :key="name">
+            <tr :style="{ 'transform': `translateY(${top}px)`, 'height': Math.round(rowHeight)+'px'}">
+              <th scope="row" class="m-0">
+                <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
+                  <p class="m-auto" :style="{ 'color': textColor(color).hex } ">Aa</p>
+                </div>
+              </th>
+              <td>
+                <p class="m-0">
+                  {{ name }}
+                </p>
               </td>
-            </template>
-          </tr>
-        </template>
+              <template :key="index" v-for="data, index in [
+                color.hex,
+                color.rgb.r, color.rgb.g, color.rgb.b, color.hsl.h, color.hsl.s, color.hsl.l,
+                toRGB(color), toHSL(color)
+              ]">
+                <td :class="{ 'text-center': typeof data === 'number'}">
+                  <a href="#" @click.prevent="copy(data)">{{ data }}</a>
+                </td>
+              </template>
+            </tr>
+          </template>
+        </VirtualScroller>
       </tbody>
     </table>
   </div>
@@ -103,6 +143,7 @@ function toHSL(color) {
 
 <style lang="scss" scoped>
   th, td {
+    height: calc(3.5rem + 1vw);
     padding: calc(0.5rem + 0.5vw);
     white-space: nowrap;
   }

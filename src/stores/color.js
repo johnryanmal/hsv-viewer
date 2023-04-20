@@ -4,7 +4,7 @@ import axios from 'axios'
 
 const api = axios.create({ baseURL: 'https://api.color.pizza' })
 
-export default defineStore('counter', () => {
+export const useColorStore = defineStore('color', () => {
   const memo = ref({})
 
   function get(query, process) {
