@@ -57,12 +57,12 @@ const scroller = ref(null)
 const top = ref(null)
 
 function onResize() {
+  rem.value = parseInt(window.getComputedStyle(document.body).fontSize)
+  vw.value = window.innerWidth / 100
   innerHeight.value = window.innerHeight
 }
 
 function onScroll() {
-  rem.value = parseInt(window.getComputedStyle(document.body).fontSize)
-  vw.value = window.innerWidth / 100
   top.value = scroller.value.getBoundingClientRect().top
 }
 
@@ -83,20 +83,33 @@ onBeforeUnmount(() => {
       <thead>
         <tr class="border-bottom">
           <template :key="name" v-for="span, name in {
-            'General': 3,
-            'Values': 6,
-            'CSS': 2
+            'General': 3, // color, name, hex
+            'Values': 6, //r, g, b, h, s, l
+            'CSS': 2 // rgb, hsl
           }">
             <th scope="colgroup" :colspan="span"><h5>{{ name }}</h5></th>
           </template>
         </tr>
         <tr>
-          <template :key="name" v-for="name in [
-            'Color', 'Name', 'Hex',
-            'Red', 'Green', 'Blue', 'Hue', 'Satuation', 'Lightness',
-            'RGB', 'HSL'
-          ]">
-            <th scope="col">
+          <template :key="name" v-for="width, name in {
+            // General
+            'Color': Math.round(rowHeight)+'px',
+            'Name': '250px',
+            'Hex': '100%',
+
+            // Values
+            'Red': '100%',
+            'Green': '100%',
+            'Blue': '100%',
+            'Hue': '100%',
+            'Saturation': '100%',
+            'Lightness': '100%',
+
+            // CSS
+            'RGB': '100%',
+            'HSL': '100%'
+          }">
+            <th scope="col" :style="{ 'min-width': width }">
               {{ name }}
             </th>
           </template>
@@ -110,7 +123,6 @@ onBeforeUnmount(() => {
           :item-cluster="2"
           :view-height="innerHeight"
           :view-scroll="-top"
-          :view-buffer="0"
         >
           <template #default="{item: [name, color], top} " :key="name">
             <tr :style="{ 'transform': `translateY(${top}px)`, 'height': Math.round(rowHeight)+'px'}">
