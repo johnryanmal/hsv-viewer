@@ -2,6 +2,7 @@
 import { computed, toRefs } from 'vue'
 
 const props = defineProps({
+  itemKey: { type: Function, required: false, default: JSON.stringify },
   itemList: { type: Array, required: false, default: [] },
   itemHeight: { type: Number, required: false, default: 0 },
   itemCluster: { type: Number, required: false, default: 1 },
@@ -10,7 +11,7 @@ const props = defineProps({
   viewBuffer: { type: Number, required: false, default: 1 }
 })
 
-const { itemList, itemHeight, itemCluster, viewHeight, viewBuffer, viewScroll } = toRefs(props)
+const { itemKey, itemList, itemHeight, itemCluster, viewHeight, viewBuffer, viewScroll } = toRefs(props)
 
 const itemCount = computed(() => itemList.value.length)
 const itemListHeight = computed(() => itemCount.value * itemHeight.value)
@@ -46,6 +47,6 @@ const renderBottom = computed(() => renderAfter.value * itemHeight.value)
 
 <template>
   <div :style="{ 'height': Math.round(renderTop)+'px' }"></div>
-  <slot name="default" v-for="item in renderItems" v-bind="{ item }"></slot>
+  <slot name="default" v-for="item in renderItems" v-bind="{ item }" :key="itemKey(item)"></slot>
   <div :style="{ 'height': Math.round(renderBottom)+'px' }"></div>
 </template>

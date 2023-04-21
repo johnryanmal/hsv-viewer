@@ -121,12 +121,13 @@ onBeforeUnmount(() => {
         <VirtualScroller
           v-if="colors.entries"
           :item-list="Array.from(colors.entries())"
+          :item-key="([name, color]) => name"
           :item-height="rowHeight"
           :item-cluster="2"
           :view-height="innerHeight"
           :view-scroll="-top"
         >
-          <template #default="{item: [name, color]} " :key="name">
+          <template #default="{ item: [name, color] }">
             <tr :style="{'height': Math.round(rowHeight)+'px'}">
               <th scope="row" class="m-0">
                 <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
