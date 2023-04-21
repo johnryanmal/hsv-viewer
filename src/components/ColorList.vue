@@ -47,18 +47,20 @@ function toHSL(color) {
   return `hsl(${listed(h, s, l)})`
 }
 
-const rem = ref(parseInt(window.getComputedStyle(document.body).fontSize))
-const vw = ref(window.innerWidth / 100)
-const rowHeight = computed(() => 3.5*rem.value + 1*vw.value)
-
+const rowHeight = ref(calcRowHeight())
 const innerHeight = ref(window.innerHeight)
 
 const scroller = ref(null)
-const top = ref(null)
+const top = ref(0)
+
+function calcRowHeight() {
+  const rem = parseInt(window.getComputedStyle(document.body).fontSize)
+  const vw = window.innerWidth / 100
+  return 3.5*rem + 1*vw
+}
 
 function onResize() {
-  rem.value = parseInt(window.getComputedStyle(document.body).fontSize)
-  vw.value = window.innerWidth / 100
+  rowHeight.value = calcRowHeight()
   innerHeight.value = window.innerHeight
 }
 
@@ -115,7 +117,7 @@ onBeforeUnmount(() => {
           </template>
         </tr>
       </thead>
-      <tbody ref="scroller" :style="{ 'height': Math.round(rowHeight * colors.size)+'px'}">
+      <tbody ref="scroller">
         <VirtualScroller
           v-if="colors.entries"
           :item-list="Array.from(colors.entries())"
@@ -124,8 +126,8 @@ onBeforeUnmount(() => {
           :view-height="innerHeight"
           :view-scroll="-top"
         >
-          <template #default="{item: [name, color], top} " :key="name">
-            <tr :style="{ 'transform': `translateY(${top}px)`, 'height': Math.round(rowHeight)+'px'}">
+          <template #default="{item: [name, color]} " :key="name">
+            <tr :style="{'height': Math.round(rowHeight)+'px'}">
               <th scope="row" class="m-0">
                 <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
                   <p class="m-auto" :style="{ 'color': textColor(color).hex } ">Aa</p>

@@ -56,6 +56,10 @@ a:not([class]) {
   }
 }
 
+body {
+  overflow-anchor: none;
+}
+
 // a:not([class]) {
 //   color: var(--savoy-blue);
 //   text-decoration: none;

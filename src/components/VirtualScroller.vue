@@ -2,7 +2,7 @@
 import { computed, toRefs } from 'vue'
 
 const props = defineProps({
-  itemList: { type: Array, required: false, default: []},
+  itemList: { type: Array, required: false, default: [] },
   itemHeight: { type: Number, required: false, default: 0 },
   itemCluster: { type: Number, required: false, default: 1 },
   viewScroll: { type: Number, required: false, default: 0 },
@@ -29,8 +29,7 @@ const renderStart = computed(() => viewStart.value - renderOffset.value)
 const renderBegin = computed(() => Math.max(renderStart.value, 0))
 const renderEnd = computed(() => Math.min(renderStart.value + renderSize.value, itemCount.value))
 
-const renderCount = computed(() => renderEnd.value - renderBegin.value)
-// const renderHeight = computed(() => renderCount.value * itemHeight.value)
+const renderCount = computed(() => Math.max(renderEnd.value - renderBegin.value, 0))
 
 const renderItems = computed(() => {
   if (useScroll) {
@@ -39,14 +38,14 @@ const renderItems = computed(() => {
   return itemList.value
 })
 
-const renderBefore = computed(() => renderBegin.value)
+const renderBefore = computed(() => Math.min(renderBegin.value, itemCount.value - renderCount.value))
 const renderAfter = computed(() => itemCount.value - renderBefore.value - renderCount.value)
 const renderTop = computed(() => renderBefore.value * itemHeight.value)
 const renderBottom = computed(() => renderAfter.value * itemHeight.value)
 </script>
 
 <template>
-  <slot name="default" v-for="item in renderItems" v-bind="{ item, top: Math.round(renderTop) }"></slot>
-  <div :style="{ 'transform': `translateY(${Math.round(renderTop)}px)`, 'height': Math.round(renderBottom)+'px' }"></div>
+  <div :style="{ 'height': Math.round(renderTop)+'px' }"></div>
+  <slot name="default" v-for="item in renderItems" v-bind="{ item }"></slot>
+  <div :style="{ 'height': Math.round(renderBottom)+'px' }"></div>
 </template>
-  
