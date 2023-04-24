@@ -60,6 +60,10 @@ body {
   overflow-anchor: none;
 }
 
+.tooltip {
+  pointer-events: none;
+}
+
 // a:not([class]) {
 //   color: var(--savoy-blue);
 //   text-decoration: none;

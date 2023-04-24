@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useColorStore } from '@/stores/color.js'
 import VirtualScroller from '@/components/VirtualScroller.vue'
+import { Tooltip } from 'bootstrap'
 
 const store = useColorStore()
 const colors = computed(() => store.getList('bestOf'))
@@ -29,8 +30,11 @@ function textColor(color) {
   }
 }
 
-function copy(text) {
-  navigator.clipboard.writeText(text)
+function copy(event, text) {
+  navigator.clipboard?.writeText(text).then(() => {
+    createTooltip(event, 'Copied!', 1000)
+    currentTooltip.value = null
+  })
 }
 
 function listed(...args) {
@@ -66,6 +70,32 @@ function onResize() {
 
 function onScroll() {
   top.value = scroller.value.getBoundingClientRect().top
+}
+
+
+const currentTooltip = ref(null)
+
+function createTooltip(event, title, timeout) {
+  const element = event.target
+  const tooltip = new Tooltip(element, {
+    boundary: document.body,
+    title,
+    placement: 'top',
+    fallbackPlacements: ['bottom', 'left', 'right'],
+    trigger: 'manual'
+  })
+  tooltip.show()
+  if (timeout) {
+    setTimeout(() => { tooltip.hide() }, timeout)
+  }
+
+  currentTooltip.value?.dispose()
+  currentTooltip.value = tooltip
+}
+
+function destroyTooltip() {
+  currentTooltip.value?.hide()
+  currentTooltip.value = null
 }
 
 onMounted(() => {
@@ -145,7 +175,7 @@ onBeforeUnmount(() => {
                 toRGB(color), toHSL(color)
               ]">
                 <td :class="{ 'text-center': typeof data === 'number'}">
-                  <a href="#" @click.prevent="copy(data)">{{ data }}</a>
+                  <a href="#" @mouseenter="createTooltip($event, 'Copy to Clipboard')" @mouseleave="destroyTooltip" @click.prevent="copy($event, data)">{{ data }}</a>
                 </td>
               </template>
             </tr>
