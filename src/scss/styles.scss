@@ -62,6 +62,10 @@ body {
 
 .tooltip {
   pointer-events: none;
+
+  &[data-popper-reference-hidden] {
+    visibility: hidden;
+  }
 }
 
 // a:not([class]) {

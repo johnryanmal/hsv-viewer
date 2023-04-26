@@ -33,7 +33,6 @@ function textColor(color) {
 function copy(event, text) {
   navigator.clipboard?.writeText(text).then(() => {
     createTooltip(event, 'Copied!', 1000)
-    currentTooltip.value = null
   })
 }
 
@@ -76,6 +75,8 @@ function onScroll() {
 const currentTooltip = ref(null)
 
 function createTooltip(event, title, timeout) {
+  clearTooltip()
+
   const element = event.target
   const tooltip = new Tooltip(element, {
     boundary: document.body,
@@ -85,12 +86,24 @@ function createTooltip(event, title, timeout) {
     trigger: 'manual'
   })
   tooltip.show()
-  if (timeout) {
-    setTimeout(() => { tooltip.hide() }, timeout)
-  }
 
-  currentTooltip.value?.dispose()
-  currentTooltip.value = tooltip
+  if (timeout) {
+    //resolves on timeout
+    //resolves on resize (hides floating tooltips)
+    const waitTimeout = new Promise((resolve, reject) => {
+      window.addEventListener('resize', resolve, { once: true })
+
+      setTimeout(() => {
+        window.removeEventListener('resize', resolve)
+        resolve()
+      }, timeout)
+    })
+    waitTimeout.then(
+      () => { tooltip.hide() },
+    )
+  } else {
+    currentTooltip.value = tooltip
+  }
 }
 
 function destroyTooltip() {
@@ -98,14 +111,34 @@ function destroyTooltip() {
   currentTooltip.value = null
 }
 
+function clearTooltip() {
+  currentTooltip.value?.dispose()
+  currentTooltip.value = null
+}
+
+function updateTooltip() {
+  currentTooltip.value?.update()
+}
+
+const animate = ref(true)
+function onFrame() {
+  updateTooltip()
+  
+  if (animate.value) {
+    requestAnimationFrame(onFrame)
+  }
+}
+
 onMounted(() => {
   window.addEventListener('resize', onResize)
   window.addEventListener('scroll', onScroll)
+  requestAnimationFrame(onFrame)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize)
   window.removeEventListener('scroll', onScroll)
+  animate.value = false
 })
 </script>
 
