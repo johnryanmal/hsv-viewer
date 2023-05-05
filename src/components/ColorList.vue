@@ -51,15 +51,22 @@ function toHSL(color) {
 }
 
 const rowHeight = ref(calcRowHeight())
+const headHeight = computed(() => rowHeight.value * 2)
+const bodyHeight = computed(() => rowHeight.value * colors.value.size)
+const tableHeight = computed(() => headHeight.value + bodyHeight.value-1000)
+
 const innerHeight = ref(window.innerHeight)
 
+
+const wrapper = ref(null)
 const scroller = ref(null)
+const outertop = ref(0)
 const top = ref(0)
 
 function calcRowHeight() {
   const rem = parseInt(window.getComputedStyle(document.body).fontSize)
   const vw = window.innerWidth / 100
-  return 3.5*rem + 1*vw
+  return Math.round(3.5*rem + 1*vw)
 }
 
 function onResize() {
@@ -68,6 +75,8 @@ function onResize() {
 }
 
 function onScroll() {
+  console.log('scroll')
+  outertop.value = wrapper.value.getBoundingClientRect().top
   top.value = scroller.value.getBoundingClientRect().top
 }
 
@@ -79,7 +88,7 @@ function createTooltip(event, title, timeout) {
 
   const element = event.target
   const tooltip = new Tooltip(element, {
-    boundary: document.body,
+    boundary: scroller.value,
     title,
     placement: 'top',
     fallbackPlacements: ['bottom', 'left', 'right'],
@@ -120,45 +129,69 @@ function updateTooltip() {
   currentTooltip.value?.update()
 }
 
+const resize = ref(false)
+const scroll = ref(false)
 const animate = ref(true)
 function onFrame() {
+  if (resize.value) {
+    onResize()
+    resize.value = false
+  }
+  if (scroll.value) {
+    onScroll()
+    scroll.value = false
+  }
+
   updateTooltip()
-  
+
   if (animate.value) {
     requestAnimationFrame(onFrame)
   }
 }
 
+function queueResize() {
+  resize.value = true
+}
+
+function queueScroll() {
+  scroll.value = true
+}
+
 onMounted(() => {
-  window.addEventListener('resize', onResize)
-  window.addEventListener('scroll', onScroll)
+  window.addEventListener('resize', queueResize)
+  wrapper.value.addEventListener('scroll', queueScroll)
   requestAnimationFrame(onFrame)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onResize)
-  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', queueResize)
+  wrapper.value.removeEventListener('scroll', queueScroll)
   animate.value = false
 })
 </script>
 
 <template>
-  <div class="table-responsive">
-    <table class="table table-borderless table-dark align-middle table-striped overflow-hidden">
-      <thead>
-        <tr class="border-bottom">
-          <template :key="name" v-for="span, name in {
-            'General': 3, // color, name, hex
+  <div ref="wrapper" class="table-responsive border-top border-bottom rounded" :style="{ 'height': rowHeight*10+'px'}">
+    <table class="table table-borderless table-dark align-middle table-striped" :style="{ 'height': tableHeight+'px' }">
+      <thead class="sticky-top" :style="{ 'height': headHeight+'px' }">
+        <tr :style="{'height': rowHeight+'px'}">
+          <template :key="name" v-for="span, name, index in {
+            '': 1,
+            'General': 2, // name, hex
             'Values': 6, //r, g, b, h, s, l
             'CSS': 2 // rgb, hsl
           }">
-            <th scope="colgroup" :colspan="span"><h5>{{ name }}</h5></th>
+            <th scope="colgroup" class="p-0" v-bind="(index === 0 ? {class: 'position-sticky', style: {'left': 0, 'z-index': 1}} : {})"  :colspan="span">
+              <th class="position-sticky" :style="{'left': rowHeight+'px'}">
+                <h5>{{ name }}</h5>
+              </th>
+            </th>
           </template>
         </tr>
-        <tr>
-          <template :key="name" v-for="width, name in {
+        <tr :style="{'height': rowHeight+'px'}">
+          <template :key="name" v-for="width, name, index in {
             // General
-            'Color': Math.round(rowHeight)+'px',
+            'Color': rowHeight+'px',
             'Name': '250px',
             'Hex': '100%',
 
@@ -174,13 +207,13 @@ onBeforeUnmount(() => {
             'RGB': '100%',
             'HSL': '100%'
           }">
-            <th scope="col" :style="{ 'min-width': width }">
+            <th scope="col" :class="(index === 0 ? 'position-sticky' : '')" :style="{ 'left': 0, 'min-width': width }">
               {{ name }}
             </th>
           </template>
         </tr>
       </thead>
-      <tbody ref="scroller">
+      <tbody ref="scroller" :style="{ 'height': bodyHeight+'px' }">
         <VirtualScroller
           v-if="colors.entries"
           :item-list="Array.from(colors.entries())"
@@ -191,8 +224,8 @@ onBeforeUnmount(() => {
           :view-scroll="-top"
         >
           <template #default="{ item: [name, color] }">
-            <tr :style="{'height': Math.round(rowHeight)+'px'}">
-              <th scope="row" class="m-0">
+            <tr :style="{'height': rowHeight+'px'}">
+              <th scope="row" class="position-sticky m-0" :style="{'left': 0}">
                 <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
                   <p class="m-auto" :style="{ 'color': textColor(color).hex } ">Aa</p>
                 </div>

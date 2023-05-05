@@ -12,7 +12,7 @@ import Header from '@/components/Header.vue'
       }
     ]"
   />
-  <div class="animate-size pt-2 px-2 pt-sm-3 px-sm-3 pt-md-4 px-md-4 pt-xl-5 px-xl-5">
+  <div class="animate-size py-2 px-2 py-sm-3 px-sm-3 py-md-4 px-md-4 py-xl-5 px-xl-5">
     <RouterView />
   </div>
 </template>
