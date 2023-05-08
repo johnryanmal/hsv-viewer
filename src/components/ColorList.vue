@@ -55,13 +55,16 @@ const headHeight = computed(() => rowHeight.value * 2)
 const bodyHeight = computed(() => rowHeight.value * colors.value.size)
 const tableHeight = computed(() => headHeight.value + bodyHeight.value-1000)
 
-const innerHeight = ref(window.innerHeight)
-
-
 const wrapper = ref(null)
 const scroller = ref(null)
 const outertop = ref(0)
 const top = ref(0)
+
+const viewWidth = ref(0)
+const viewHeight = ref(0)
+
+const root = ref(null)
+const view = ref(null)
 
 function calcRowHeight() {
   const rem = parseInt(window.getComputedStyle(document.body).fontSize)
@@ -69,13 +72,19 @@ function calcRowHeight() {
   return Math.round(3.5*rem + 1*vw)
 }
 
+function calcViewWidth() {
+  return Math.round(wrapper.value?.clientWidth - rowHeight.value)
+}
+
+function calcViewHeight() {
+  return Math.round(wrapper.value?.clientHeight - headHeight.value)
+}
+
 function onResize() {
   rowHeight.value = calcRowHeight()
-  innerHeight.value = window.innerHeight
 }
 
 function onScroll() {
-  console.log('scroll')
   outertop.value = wrapper.value.getBoundingClientRect().top
   top.value = scroller.value.getBoundingClientRect().top
 }
@@ -83,16 +92,31 @@ function onScroll() {
 
 const currentTooltip = ref(null)
 
+function calcTooltipPadding() {
+  return {
+    top: outertop.value + headHeight.value,
+    left: rowHeight.value
+  }
+}
+
 function createTooltip(event, title, timeout) {
   clearTooltip()
 
   const element = event.target
   const tooltip = new Tooltip(element, {
-    boundary: scroller.value,
+    boundary: view.value,
+    container: view.value,
     title,
     placement: 'top',
     fallbackPlacements: ['bottom', 'left', 'right'],
-    trigger: 'manual'
+    trigger: 'manual',
+    popperConfig(config) {
+      const modifiers = Object.fromEntries(config.modifiers.map((modifier) => [modifier.name, modifier]))
+      modifiers.flip.options.padding = calcTooltipPadding()
+      
+      config.modifiers = Object.values(modifiers)
+      return config
+    }
   })
   tooltip.show()
 
@@ -135,6 +159,7 @@ const animate = ref(true)
 function onFrame() {
   if (resize.value) {
     onResize()
+    clearTooltip()
     resize.value = false
   }
   if (scroll.value) {
@@ -142,6 +167,8 @@ function onFrame() {
     scroll.value = false
   }
 
+  viewWidth.value = calcViewWidth()
+  viewHeight.value = calcViewHeight()
   updateTooltip()
 
   if (animate.value) {
@@ -171,84 +198,87 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="wrapper" class="table-responsive border-top border-bottom rounded" :style="{ 'height': rowHeight*10+'px'}">
-    <table class="table table-borderless table-dark align-middle table-striped" :style="{ 'height': tableHeight+'px' }">
-      <thead class="sticky-top" :style="{ 'height': headHeight+'px' }">
-        <tr :style="{'height': rowHeight+'px'}">
-          <template :key="name" v-for="span, name, index in {
-            '': 1,
-            'General': 2, // name, hex
-            'Values': 6, //r, g, b, h, s, l
-            'CSS': 2 // rgb, hsl
-          }">
-            <th scope="colgroup" class="p-0" v-bind="(index === 0 ? {class: 'position-sticky', style: {'left': 0, 'z-index': 1}} : {})"  :colspan="span">
-              <th class="position-sticky" :style="{'left': rowHeight+'px'}">
-                <h5>{{ name }}</h5>
+  <div ref="root" class="position-relative">
+    <div ref="view" class="pe-none position-absolute bottom-0 end-0" :style="{'width': viewWidth+'px', 'height': viewHeight+'px', 'z-index': 1}"></div>
+    <div ref="wrapper" class="table-responsive border-top border-bottom rounded" :style="{ 'height': rowHeight*10+'px'}">
+      <table class="table table-borderless table-dark align-middle table-striped" :style="{ 'height': tableHeight+'px' }">
+        <thead class="sticky-top" :style="{ 'height': headHeight+'px' }">
+          <tr :style="{'height': rowHeight+'px'}">
+            <template :key="name" v-for="span, name, index in {
+              '': 1,
+              'General': 2, // name, hex
+              'Values': 6, //r, g, b, h, s, l
+              'CSS': 2 // rgb, hsl
+            }">
+              <th scope="colgroup" class="p-0" v-bind="(index === 0 ? {class: 'position-sticky', style: {'left': 0, 'z-index': 1}} : {})"  :colspan="span">
+                <th class="position-sticky" :style="{'left': rowHeight+'px'}">
+                  <h5>{{ name }}</h5>
+                </th>
               </th>
-            </th>
-          </template>
-        </tr>
-        <tr :style="{'height': rowHeight+'px'}">
-          <template :key="name" v-for="width, name, index in {
-            // General
-            'Color': rowHeight+'px',
-            'Name': '250px',
-            'Hex': '100%',
+            </template>
+          </tr>
+          <tr :style="{'height': rowHeight+'px'}">
+            <template :key="name" v-for="width, name, index in {
+              // General
+              'Color': rowHeight+'px',
+              'Name': '250px',
+              'Hex': '100%',
 
-            // Values
-            'Red': '100%',
-            'Green': '100%',
-            'Blue': '100%',
-            'Hue': '100%',
-            'Saturation': '100%',
-            'Lightness': '100%',
+              // Values
+              'Red': '100%',
+              'Green': '100%',
+              'Blue': '100%',
+              'Hue': '100%',
+              'Saturation': '100%',
+              'Lightness': '100%',
 
-            // CSS
-            'RGB': '100%',
-            'HSL': '100%'
-          }">
-            <th scope="col" :class="(index === 0 ? 'position-sticky' : '')" :style="{ 'left': 0, 'min-width': width }">
-              {{ name }}
-            </th>
-          </template>
-        </tr>
-      </thead>
-      <tbody ref="scroller" :style="{ 'height': bodyHeight+'px' }">
-        <VirtualScroller
-          v-if="colors.entries"
-          :item-list="Array.from(colors.entries())"
-          :item-key="([name, color]) => name"
-          :item-height="rowHeight"
-          :item-cluster="2"
-          :view-height="innerHeight"
-          :view-scroll="-top"
-        >
-          <template #default="{ item: [name, color] }">
-            <tr :style="{'height': rowHeight+'px'}">
-              <th scope="row" class="position-sticky m-0" :style="{'left': 0}">
-                <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
-                  <p class="m-auto" :style="{ 'color': textColor(color).hex } ">Aa</p>
-                </div>
+              // CSS
+              'RGB': '100%',
+              'HSL': '100%'
+            }">
+              <th scope="col" :class="(index === 0 ? 'position-sticky' : '')" :style="{ 'left': 0, 'min-width': width }">
+                {{ name }}
               </th>
-              <td>
-                <p class="m-0">
-                  {{ name }}
-                </p>
-              </td>
-              <template :key="index" v-for="data, index in [
-                color.hex,
-                color.rgb.r, color.rgb.g, color.rgb.b, color.hsl.h, color.hsl.s, color.hsl.l,
-                toRGB(color), toHSL(color)
-              ]">
-                <td :class="{ 'text-center': typeof data === 'number'}">
-                  <a href="#" @mouseenter="createTooltip($event, 'Copy to Clipboard')" @mouseleave="destroyTooltip" @click.prevent="copy($event, data)">{{ data }}</a>
+            </template>
+          </tr>
+        </thead>
+        <tbody ref="scroller" :style="{ 'height': bodyHeight+'px' }">
+          <VirtualScroller
+            v-if="colors.entries"
+            :item-list="Array.from(colors.entries())"
+            :item-key="([name, color]) => name"
+            :item-height="rowHeight"
+            :item-cluster="2"
+            :view-height="viewHeight"
+            :view-scroll="-top"
+          >
+            <template #default="{ item: [name, color] }">
+              <tr :style="{'height': rowHeight+'px'}">
+                <th scope="row" class="position-sticky m-0" :style="{'left': 0, 'z-index': 1}">
+                  <div class="d-flex align-items-center justify-content-center" :style="{ 'width': '2.5rem', 'height': '2.5rem', 'backgroundColor': color.hex }">
+                    <p class="m-auto" :style="{ 'color': textColor(color).hex } ">Aa</p>
+                  </div>
+                </th>
+                <td>
+                  <p class="m-0">
+                    {{ name }}
+                  </p>
                 </td>
-              </template>
-            </tr>
-          </template>
-        </VirtualScroller>
-      </tbody>
-    </table>
+                <template :key="index" v-for="data, index in [
+                  color.hex,
+                  color.rgb.r, color.rgb.g, color.rgb.b, color.hsl.h, color.hsl.s, color.hsl.l,
+                  toRGB(color), toHSL(color)
+                ]">
+                  <td :class="{ 'text-center': typeof data === 'number'}">
+                    <a href="#" @mouseenter="createTooltip($event, 'Copy to Clipboard')" @mouseleave="destroyTooltip" @click.prevent="copy($event, data)">{{ data }}</a>
+                  </td>
+                </template>
+              </tr>
+            </template>
+          </VirtualScroller>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
